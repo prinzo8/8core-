@@ -1,0 +1,240 @@
+(()=>{
+const scrollProgressBar=document.querySelector('.scroll-progress-bar');
+
+const updateScrollProgress=()=>{
+    if(!scrollProgressBar)return;
+
+    const scrollTop=window.scrollY;
+    const scrollHeight=document.documentElement.scrollHeight-window.innerHeight;
+
+    const progress=scrollHeight>0
+        ? Math.min(100,Math.max(0,(scrollTop/scrollHeight)*100))
+        : 0;
+
+    scrollProgressBar.style.width=`${progress}%`;
+};
+
+window.addEventListener('scroll',updateScrollProgress,{passive:true});
+window.addEventListener('resize',updateScrollProgress,{passive:true});
+updateScrollProgress();
+const header=document.querySelector('[data-header]');
+/* 8CORE — smooth internal navigation */
+document.addEventListener('click',(event)=>{
+    const link=event.target.closest('a[href*="#"]');
+    if(!link)return;
+
+    const url=new URL(link.href,window.location.href);
+    if(url.origin!==window.location.origin ||
+       url.pathname!==window.location.pathname ||
+       !url.hash)return;
+
+    const target=document.querySelector(url.hash);
+    if(!target)return;
+
+    event.preventDefault();
+
+    const header=document.querySelector('[data-header]');
+    const offset=header ? header.offsetHeight : 0;
+    const top=target.getBoundingClientRect().top+window.scrollY-offset;
+
+    window.scrollTo({
+        top:Math.max(0,top),
+        behavior:'smooth'
+    });
+
+    history.replaceState(null,'',url.hash);
+});
+const reveal=()=>document.querySelectorAll('.reveal').forEach(el=>{if(el.getBoundingClientRect().top<window.innerHeight*.88)el.classList.add('is-visible')});window.addEventListener('scroll',()=>{header?.classList.toggle('scrolled',window.scrollY>20);reveal()},{passive:true});reveal();const openModal=modal=>{if(!modal)return;modal.classList.add('is-open');modal.setAttribute('aria-hidden','false');document.body.classList.add('modal-open');modal.querySelector('.modal-close')?.focus()};const closeModal=modal=>{if(!modal)return;modal.classList.remove('is-open');modal.setAttribute('aria-hidden','true');document.body.classList.remove('modal-open')};document.querySelectorAll('[data-modal-open]').forEach(btn=>btn.addEventListener('click',()=>openModal(document.getElementById(btn.dataset.modalOpen))));document.querySelectorAll('[data-portfolio-open]').forEach(btn=>btn.addEventListener('click',()=>openModal(document.getElementById(btn.dataset.portfolioOpen))));document.querySelectorAll('[data-modal-close]').forEach(btn=>btn.addEventListener('click',()=>closeModal(btn.closest('.modal'))));document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeModal(m)}));document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal.is-open').forEach(closeModal)});if(!matchMedia('(pointer:coarse)').matches){const dot=document.createElement('div'),ring=document.createElement('div');dot.className='cursor-dot';ring.className='cursor-ring';document.body.append(dot,ring);let x=0,y=0,rx=0,ry=0;window.addEventListener('mousemove',e=>{x=e.clientX;y=e.clientY;dot.style.transform=`translate(${x}px,${y}px)`});const tick=()=>{rx+=(x-rx)*.15;ry+=(y-ry)*.15;ring.style.transform=`translate(${rx}px,${ry}px)`;requestAnimationFrame(tick)};tick();document.querySelectorAll('a,button').forEach(el=>{el.addEventListener('mouseenter',()=>ring.classList.add('hover'));el.addEventListener('mouseleave',()=>ring.classList.remove('hover'))})}})();
+document.addEventListener('click',(event)=>{    const link=event.target.closest('a[href*="#"]');    const url=new URL(link.href,window.location.href);    const target=document.querySelector(url.hash);    event.preventDefault();    const header=document.querySelector('[data-header]');    const offset=header?header.offsetHeight:0;    const top=target.getBoundingClientRect().top+window.scrollY-offset;    window.scrollTo({top:Math.max(0,top),behavior:'smooth'});    history.replaceState(null,'',url.hash);});
+
+
+/* 8Core scroll progress */
+const progressBar = document.querySelector('.scroll-progress span');
+
+if (progressBar) {
+    const updateScrollProgress = () => {
+        const scrollTop = window.scrollY;
+        const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = scrollHeight > 0
+            ? (scrollTop / scrollHeight) * 100
+            : 0;
+
+        progressBar.style.width = `${Math.min(100, Math.max(0, progress))}%`;
+    };
+
+    window.addEventListener('scroll', updateScrollProgress, { passive: true });
+    window.addEventListener('resize', updateScrollProgress);
+    updateScrollProgress();
+}
+
+
+/* =========================================================
+   PREVIOUS SECTION NAVIGATION
+   ========================================================= */
+
+const previousSectionButton=document.querySelector('.scroll-top-section');
+
+const getPageSections=()=>{
+    return Array.from(document.querySelectorAll(
+        'main section, main .section, section.section'
+    )).filter(section=>{
+        const rect=section.getBoundingClientRect();
+        return rect.height>0;
+    });
+};
+
+const updatePreviousSectionButton=()=>{
+    if(!previousSectionButton)return;
+
+    const shouldShow=window.scrollY>80;
+
+    previousSectionButton.classList.toggle('is-visible',shouldShow);
+};
+
+const goToPreviousSection=()=>{
+    const sections=getPageSections();
+
+    if(!sections.length){
+        window.scrollTo({
+            top:0,
+            behavior:'smooth'
+        });
+        return;
+    }
+
+    const currentScroll=window.scrollY;
+    const header=document.querySelector('.site-header');
+    const headerHeight=header ? header.offsetHeight : 0;
+
+    /*
+     * On cherche la section située immédiatement
+     * au-dessus de la position actuelle.
+     */
+    let previousSection=null;
+
+    for(let i=0;i<sections.length;i++){
+        const sectionTop=sections[i].getBoundingClientRect().top+window.scrollY;
+
+        if(sectionTop<currentScroll-40){
+            previousSection=sections[i];
+        }else{
+            break;
+        }
+    }
+
+    /*
+     * Si on est déjà dans la première section,
+     * on revient tout en haut.
+     */
+    if(!previousSection){
+        window.scrollTo({
+            top:0,
+            behavior:'smooth'
+        });
+        return;
+    }
+
+    const targetTop=Math.max(
+        0,
+        previousSection.getBoundingClientRect().top+
+        window.scrollY-
+        headerHeight
+    );
+
+    window.scrollTo({
+        top:targetTop,
+        behavior:'smooth'
+    });
+};
+
+if(previousSectionButton){
+
+    previousSectionButton.addEventListener(
+        'click',
+        goToPreviousSection
+    );
+
+    window.addEventListener(
+        'scroll',
+        updatePreviousSectionButton,
+        {passive:true}
+    );
+
+    window.addEventListener(
+        'resize',
+        updatePreviousSectionButton,
+        {passive:true}
+    );
+
+    updatePreviousSectionButton();
+}
+
+
+/* =========================================================
+   8CORE — COOKIE CONSENT
+   ========================================================= */
+
+(() => {
+    const banner = document.querySelector('#cookie-consent');
+    const settings = document.querySelector('#cookie-settings');
+
+    if (!banner || !settings) return;
+
+    const STORAGE_KEY = '8core_cookie_consent';
+
+    const show = (element) => {
+        element.classList.add('is-visible');
+        element.setAttribute('aria-hidden', 'false');
+    };
+
+    const hide = (element) => {
+        element.classList.remove('is-visible');
+        element.setAttribute('aria-hidden', 'true');
+    };
+
+    const save = (value) => {
+        localStorage.setItem(STORAGE_KEY, value);
+        hide(banner);
+        hide(settings);
+    };
+
+    if (!localStorage.getItem(STORAGE_KEY)) {
+        show(banner);
+    }
+
+    document.querySelector('[data-cookie-accept]')
+        ?.addEventListener('click', () => save('all'));
+
+    document.querySelector('[data-cookie-reject]')
+        ?.addEventListener('click', () => save('essential'));
+
+    document.querySelectorAll('[data-cookie-manage]')
+        .forEach((button) => {
+            button.addEventListener('click', () => {
+                hide(banner);
+                show(settings);
+            });
+        });
+
+    document.querySelector('[data-cookie-close]')
+        ?.addEventListener('click', () => {
+            hide(settings);
+            show(banner);
+        });
+
+    document.querySelector('[data-cookie-save]')
+        ?.addEventListener('click', () => {
+            const analytics = document.querySelector('#cookie-analytics');
+            save(analytics?.checked ? 'analytics' : 'essential');
+        });
+
+    document.querySelector('[data-cookie-accept-settings]')
+        ?.addEventListener('click', () => save('all'));
+
+    settings.addEventListener('click', (event) => {
+        if (event.target === settings) {
+            hide(settings);
+            show(banner);
+        }
+    });
+})();

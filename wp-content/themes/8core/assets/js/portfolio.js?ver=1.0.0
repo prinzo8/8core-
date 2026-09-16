@@ -1,0 +1,30 @@
+(function () {
+  'use strict';
+  function openProjectModal(trigger) {
+    var id = trigger && trigger.getAttribute('data-portfolio-open');
+    var modal = id ? document.getElementById(id) : null;
+    if (!modal) return;
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('modal-open');
+    var close = modal.querySelector('[data-modal-close]');
+    if (close) close.focus();
+  }
+  function closeProjectModal(modal) {
+    if (!modal) return;
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('modal-open');
+  }
+  document.addEventListener('click', function (event) {
+    var trigger = event.target.closest ? event.target.closest('[data-portfolio-open]') : null;
+    if (trigger) { event.preventDefault(); openProjectModal(trigger); return; }
+    var close = event.target.closest ? event.target.closest('[data-modal-close]') : null;
+    if (close) { closeProjectModal(close.closest('.modal')); return; }
+    if (event.target.classList && event.target.classList.contains('modal')) closeProjectModal(event.target);
+  });
+  document.addEventListener('keydown', function (event) {
+    if (event.key !== 'Escape') return;
+    document.querySelectorAll('.portfolio-modal.is-open').forEach(closeProjectModal);
+  });
+}());
